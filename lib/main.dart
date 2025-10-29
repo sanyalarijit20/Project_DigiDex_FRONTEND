@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'splash_screen.dart';
+import 'package:provider/provider.dart'; 
+import 'package:project_digidex_frontend/providers/auth_provider.dart'; 
+import 'package:project_digidex_frontend/screens/splash_screen.dart'; 
 
-Future<void> main() async{
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
-  runApp(const MyApp());
+
+  runApp(
+    ChangeNotifierProvider(
+      create: (ctx) => AuthProvider(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -18,10 +26,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
-        brightness: Brightness.dark, // A dark theme might look cool
+        brightness: Brightness.dark,
       ),
       home: const MySplashScreen(),
     );
   }
 }
-
