@@ -93,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search Pokémon by name or number...',
+                    hintText: 'Search for any Pokémon!',
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
                     fillColor: Colors.black,

@@ -82,4 +82,62 @@ class AuthApiService {
       throw Exception(body['message'] ?? 'Failed to add badge');
     }
   }
+  // 1. DELETE POKEMON
+  Future<void> deletePokemon(
+      String token, String folderId, String pokemonName) async {
+    // Builds the URL: /api/profile/folders/FOLDER_ID/pokemons/POKEMON_NAME
+    final Uri uri = Uri.parse(
+        '$_baseUrl/api/profile/folders/$folderId/pokemons/$pokemonName');
+
+    final response = await http.delete(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          json.decode(response.body)['message'] ?? 'Failed to delete Pokémon');
+    }
+  }
+
+  // 2. DELETE BADGE
+  Future<void> deleteBadge(String token, String badgeId) async {
+    // Builds the URL: /api/profile/badges/BADGE_ID
+    final Uri uri = Uri.parse('$_baseUrl/api/profile/badges/$badgeId');
+
+    final response = await http.delete(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          json.decode(response.body)['message'] ?? 'Failed to delete badge');
+    }
+  }
+
+  // 3. DELETE USER
+  Future<void> deleteUser(String token) async {
+    // Builds the URL: /api/profile
+    final Uri uri = Uri.parse('$_baseUrl/api/profile');
+
+    final response = await http.delete(
+      uri,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+    );
+
+    if (response.statusCode != 200) {
+      throw Exception(
+          json.decode(response.body)['message'] ?? 'Failed to delete account');
+    }
+  }
 }

@@ -83,7 +83,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // --- ADD POKEMON (NEW) ---
+  // --- ADD POKEMON ---
   // This will be called by your PokemonDetailScreen
   Future<void> addPokemonToCollection(String pokemonName) async {
     if (_token == null || _user == null || _user!.folders.isEmpty) {
@@ -105,8 +105,8 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  // --- ADD BADGE (NEW) ---
-  // This will be called by your ProfileScreen
+  // --- ADD BADGE ---
+  // This will be called by ProfileScreen
   Future<void> addBadge(String name, String gym) async {
     if (_token == null) {
       throw Exception('Not logged in.');
@@ -119,6 +119,62 @@ class AuthProvider with ChangeNotifier {
       await fetchProfile();
     } catch (e) {
       rethrow; // Let the UI handle and show the error message
+    }
+  }
+
+  // --- DELETE POKEMON ---
+  // This will be called by your ProfileScreen
+  Future<void> deletePokemonFromCollection(String pokemonName) async {
+    if (_token == null || _user == null || _user!.folders.isEmpty) {
+      throw Exception('Not logged in or no folders exist.');
+    }
+
+    final folderId = _user!.folders[0].id;
+
+    try {
+      // 1. Call the API
+      await _apiService.deletePokemon(_token!, folderId, pokemonName);
+      // 2. Refresh the user data so the profile list updates *immediately*
+      await fetchProfile();
+    } catch (e) {
+      rethrow; // Let the UI handle and show the error message
+    }
+  }
+
+  // --- DELETE BADGE ---
+  // This will be called by your ProfileScreen
+  Future<void> deleteBadge(String badgeId) async {
+    if (_token == null) {
+      throw Exception('Not logged in.');
+    }
+    
+    try {
+      // 1. Call the API
+      await _apiService.deleteBadge(_token!, badgeId);
+      // 2. Refresh the user data so the badge list updates *immediately*
+      await fetchProfile();
+    } catch (e) {
+      rethrow; // Let the UI handle and show the error message
+    }
+  }
+
+  // --- DELETE USER ACCOUNT ---
+  // This will be called by your ProfileScreen
+  Future<void> deleteUserAccount() async {
+    if (_token == null) {
+      throw Exception('Not logged in.');
+    }
+    
+    _startLoading(); // Use your existing helper
+    try {
+      // 1. Call the API
+      await _apiService.deleteUser(_token!);
+      // 2. On success, log the user out completely
+      logout();
+      _isLoading = false; // We need to manually set this as logout() doesn't
+      notifyListeners();
+    } catch (e) {
+      _setError(e.toString()); // Use your existing helper
     }
   }
 }

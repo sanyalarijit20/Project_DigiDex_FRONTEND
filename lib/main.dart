@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:provider/provider.dart'; 
-import 'package:project_digidex_frontend/providers/auth_provider.dart'; 
-import 'package:project_digidex_frontend/screens/splash_screen.dart'; 
+import 'package:provider/provider.dart';
+import 'package:project_digidex_frontend/providers/auth_provider.dart';
+import 'package:project_digidex_frontend/screens/splash_screen.dart';
+import 'package:project_digidex_frontend/theme/app_theme.dart'; 
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,10 +25,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'DigiDex',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        brightness: Brightness.dark,
-      ),
+
+      // New App-Wide theme
+      theme: AppTheme.darkTheme,
       home: const MySplashScreen(),
     );
   }
