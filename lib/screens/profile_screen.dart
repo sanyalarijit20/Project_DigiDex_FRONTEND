@@ -5,9 +5,9 @@ import 'package:project_digidex_frontend/providers/auth_provider.dart';
 import 'package:project_digidex_frontend/services/api_service.dart';
 import 'package:project_digidex_frontend/models/pokemon_model.dart';
 import 'package:project_digidex_frontend/screens/pokemon_detail_screen.dart';
-import 'package:project_digidex_frontend/screens/login_screen.dart'; 
+import 'package:project_digidex_frontend/screens/home_screen.dart';
 
-//StatefulWidget to manage the TabController
+// Converted to a StatefulWidget to manage the TabController
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -128,6 +128,10 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
+  // ---
+  // --- DELETE FUNCTIONS ---
+  // ---
+
   // --- Reusable Confirmation Dialog ---
   Future<bool> _showConfirmationDialog(
     BuildContext context,
@@ -233,10 +237,12 @@ class _ProfileScreenState extends State<ProfileScreen>
     if (confirmed) {
       try {
         await authProvider.deleteUserAccount();
-        // On success, pop all screens and go back to the login screen
+        // On success, pop all screens and go back to the HOME screen
         if (mounted) {
+          // --- 2. THIS IS THE FIX ---
+          // Go back to the HomeScreen as a guest
           Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(builder: (ctx) => const LoginScreen()),
+            MaterialPageRoute(builder: (ctx) => const HomeScreen()),
             (route) => false,
           );
         }
@@ -252,7 +258,10 @@ class _ProfileScreenState extends State<ProfileScreen>
       }
     }
   }
-  
+  // ---
+  // --- END OF DELETE FUNCTIONS ---
+  // ---
+
   @override
   Widget build(BuildContext context) {
     // We use Consumer so this widget tree rebuilds when auth.user changes
@@ -323,7 +332,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
     if (folder.pokemons.isEmpty) {
       return const Center(
-          child: Text('Your "My First Collection" is empty. Go catch some!'));
+          child: Text('Your Collection is empty. Go catch some!'));
     }
 
     // Display the list of pokemon names

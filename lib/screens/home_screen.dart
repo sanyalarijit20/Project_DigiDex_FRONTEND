@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:project_digidex_frontend/models/pokemon_model.dart';
-import 'package:project_digidex_frontend/services/api_service.dart';
-import 'package:project_digidex_frontend/screens/pokemon_detail_screen.dart'; // Make sure this is in /screens
-
-// --- 1. ADD NEW IMPORTS ---
 import 'package:provider/provider.dart';
 import 'package:project_digidex_frontend/providers/auth_provider.dart';
 import 'package:project_digidex_frontend/screens/login_screen.dart';
 import 'package:project_digidex_frontend/screens/profile_screen.dart';
+import 'package:project_digidex_frontend/services/api_service.dart';
+import 'package:project_digidex_frontend/screens/pokemon_detail_screen.dart';
+import 'package:project_digidex_frontend/models/pokemon_model.dart';
+import 'package:project_digidex_frontend/theme/app_theme.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,24 +21,19 @@ class _HomeScreenState extends State<HomeScreen> {
   final ApiService _apiService = ApiService();
 
   bool _isLoading = false;
-  String _error = ''; // Renamed for consistency
+  String? _error;
 
   Future<void> _performSearch(String query) async {
     if (query.isEmpty) return;
 
     setState(() {
       _isLoading = true;
-      _error = '';
+      _error = null;
     });
 
     try {
-      // Added explicit type to fix potential 'unused import'
       final Pokemon pokemon = await _apiService.getPokemonByName(query);
 
-      // Clear search and reset state *before* navigating
-      setState(() { _isLoading = false; });
-      _searchController.clear();
-      
       if (mounted) {
         Navigator.push(
           context,
@@ -49,104 +43,117 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     } catch (e) {
-      setState(() {
-        _isLoading = false;
-        _error = e.toString().replaceAll('Exception: ', '');
-      });
+      if (mounted) {
+        setState(() {
+          _error = e.toString().replaceFirst('Exception: ', '');
+        });
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // --- 2. GET AUTH STATE ---
     final authProvider = Provider.of<AuthProvider>(context);
+    final theme = Theme.of(context); // Get the theme
 
     return Scaffold(
-      // --- 3. WRAP BODY IN A STACK ---
+      // Scaffold will use the theme's background color
       body: Stack(
         children: [
-          // --- 4. THIS IS YOUR EXISTING UI ---
+          // --- Main Content ---
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'DigiDex',
-                  style: TextStyle(
-                    fontSize: 48.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8.0),
+                  child: Text(
+                    'DigiDex',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      fontFamily: 'pokemon-solid-font', // <-- 1. FONT ADDED
+                      fontSize: 64.0, // You can adjust this size
+                    ),
                   ),
                 )
-                    .animate()
+                    .animate() // 2. The animations are applied to the Padding
                     .fadeIn(duration: 900.ms)
-                    .slideY(begin: 0.2, end: 0, duration: 600.ms, curve: Curves.easeOut)
-                    .animate(onPlay: (controller) => controller.repeat()) // Chain 2
-                    .shimmer(delay: 1000.ms, duration: 1500.ms, color: Colors.red.withOpacity(0.6))
+                    .slideY(
+                        begin: 0.2,
+                        end: 0,
+                        duration: 600.ms,
+                        curve: Curves.easeOut)
+                    .animate(onPlay: (controller) => controller.repeat())
+                    .shimmer(
+                        delay: 1000.ms,
+                        duration: 1500.ms,
+                        color: AppTheme.pokedexRed.withOpacity(0.6))
                     .then(delay: 500.ms)
-                    .shimmer(duration: 1500.ms, color: Colors.blue.withOpacity(0.6))
+                    .shimmer(
+                        duration: 1500.ms,
+                        color: AppTheme.pokedexBlue.withOpacity(0.6))
                     .then(delay: 1000.ms),
-                
+
                 const SizedBox(height: 30),
 
                 TextField(
                   controller: _searchController,
                   decoration: InputDecoration(
-                    hintText: 'Search for any Pokémon!',
+                    hintText: 'Search Pokémon...',
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
-                    fillColor: Colors.black,
+                    // The theme will handle the fillColor
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30.0),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(vertical: 15.0),
                   ),
-                  onSubmitted: (value) {
-                    _performSearch(value);
-                  },
-                )
-                    .animate()
-                    .fadeIn(delay: 300.ms, duration: 900.ms)
-                    .slideY(begin: 0.2, end: 0, duration: 600.ms, curve: Curves.easeOut),
-                
+                  onSubmitted: _performSearch,
+                ),
                 const SizedBox(height: 20),
-                
                 if (_isLoading)
-                  const CircularProgressIndicator(),
-                
-                if (_error.isNotEmpty)
+                  const Center(child: CircularProgressIndicator())
+                else if (_error != null)
                   Text(
-                    _error,
+                    _error!,
                     style: const TextStyle(color: Colors.red, fontSize: 16),
-                    textAlign: TextAlign.center, // Added for better text wrapping
+                    textAlign: TextAlign.center,
                   ),
               ],
             ),
           ),
 
-          // --- 5. ADD THE PROFILE/LOGIN BUTTON ---
+          // --- Profile Icon Button ---
           Positioned(
-            // Position in top-right corner, respecting status bar
-            top: 40.0, 
-            right: 16.0,
-            child: IconButton(
-              icon: Icon(
-                authProvider.isAuthenticated ? Icons.person : Icons.person_outline,
-                color: Colors.white, // Color to match your title
-                size: 30.0, // Make it a bit bigger
+            top: 40,
+            right: 16,
+            child: SafeArea(
+              child: IconButton(
+                icon: Icon(
+                  authProvider.isAuthenticated
+                      ? Icons.person
+                      : Icons.person_outline,
+                  size: 30,
+                  // The theme will handle the icon color
+                ),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (ctx) => authProvider.isAuthenticated
+                          ? const ProfileScreen()
+                          : const LoginScreen(),
+                    ),
+                  );
+                },
               ),
-              onPressed: () {
-                // Navigate to Profile or Login
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (ctx) => authProvider.isAuthenticated
-                        ? const ProfileScreen()
-                        : const LoginScreen(),
-                  ),
-                );
-              },
             ),
           ),
         ],
