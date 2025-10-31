@@ -4,7 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:project_digidex_frontend/models/user_model.dart'; 
 
 class AuthApiService {
-  final String _baseUrl = dotenv.env['BASE_URL']!.replaceAll('/api/pokemon', '');
+  final String _baseUrl = dotenv.env['BASE_URL']!;
 
   // --- LOGIN ---
   Future<String> login(String username, String password) async {

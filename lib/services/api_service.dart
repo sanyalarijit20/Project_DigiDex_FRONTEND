@@ -13,7 +13,7 @@ class ApiService {
     final String baseUrl = dotenv.env['BASE_URL']!;
 
    
-    final Uri uri = Uri.parse('$baseUrl/${name.toLowerCase()}');
+    final Uri uri = Uri.parse('$baseUrl/api/pokemon/${name.toLowerCase()}');
 
     try {
       final response = await http.get(uri);
